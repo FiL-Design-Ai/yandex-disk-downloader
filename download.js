@@ -8,7 +8,6 @@ const linkInput = document.getElementById('link');
 const openButton = document.getElementById('open');
 const listBox = document.getElementById('list');
 const downloadButton = document.getElementById('downloadSelected');
-const useSavedButton = document.getElementById('useSaved');
 const cancelButton = document.getElementById('cancel');
 const selectAllButton = document.getElementById('selectAll');
 const statusBox = document.getElementById('status');
@@ -176,22 +175,6 @@ async function loadDirHandle() {
   }
 }
 
-async function ensureWritePermission(handle) {
-  if ((await handle.queryPermission({ mode: 'readwrite' })) === 'granted') return true;
-  return (await handle.requestPermission({ mode: 'readwrite' })) === 'granted';
-}
-
-async function refreshSavedButton() {
-  const handle = await loadDirHandle();
-  if (handle) {
-    useSavedButton.hidden = false;
-    useSavedButton.textContent = `Скачать в «${handle.name}»`;
-    useSavedButton.dataset.name = handle.name;
-  } else {
-    useSavedButton.hidden = true;
-  }
-}
-
 // ---- список ----
 
 async function loadList() {
@@ -321,7 +304,6 @@ async function startDownload(rootDir) {
   }
   controller = new AbortController();
   downloadButton.disabled = true;
-  useSavedButton.disabled = true;
   cancelButton.disabled = false;
   progressBox.textContent = '';
   barBox.hidden = true;
@@ -348,7 +330,6 @@ async function startDownload(rootDir) {
     notifyParent({ busy: false, done: ok });
     controller = null;
     updateSummary();
-    useSavedButton.disabled = false;
     cancelButton.disabled = true;
   }
 }
@@ -364,9 +345,11 @@ function hasSelection() {
 downloadButton.addEventListener('click', async () => {
   if (!hasSelection()) return;
   // showDirectoryPicker нужно вызвать сразу по клику, пока действует нажатие пользователя.
+  // Окно выбора открывается в последней папке, которую выбирали раньше.
+  const lastDir = await loadDirHandle();
   let rootDir;
   try {
-    rootDir = await window.showDirectoryPicker({ mode: 'readwrite' });
+    rootDir = await window.showDirectoryPicker({ mode: 'readwrite', ...(lastDir ? { startIn: lastDir } : {}) });
   } catch (error) {
     if (error.name === 'AbortError') {
       setStatus('Папка не выбрана. Ничего не скачано.', 'err');
@@ -382,24 +365,7 @@ downloadButton.addEventListener('click', async () => {
   } catch (error) {
     // Без сохранения загрузка всё равно пройдёт, просто в следующий раз снова спросим папку.
   }
-  await refreshSavedButton();
   await startDownload(rootDir);
-});
-
-// Сохранённая папка: доступ переспрашиваем по клику.
-useSavedButton.addEventListener('click', async () => {
-  if (!hasSelection()) return;
-  const handle = await loadDirHandle();
-  if (!handle) {
-    await refreshSavedButton();
-    setStatus('Сохранённая папка потерялась. Выберите её заново.', 'err');
-    return;
-  }
-  if (!(await ensureWritePermission(handle))) {
-    setStatus('Нет доступа к сохранённой папке. Выберите её заново: Chrome спросит разрешение.', 'err');
-    return;
-  }
-  await startDownload(handle);
 });
 
 cancelButton.addEventListener('click', () => {
@@ -428,4 +394,3 @@ window.addEventListener('beforeunload', (event) => {
 });
 
 renderRecent();
-refreshSavedButton();

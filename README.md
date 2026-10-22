@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="icons/icon128.png" width="96" alt="Yandex Disk Downloader logo">
+<img src="icons/icon128.png?v=2" width="96" alt="Yandex Disk Downloader logo">
 
 # Yandex Disk Downloader
 

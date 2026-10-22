@@ -173,7 +173,8 @@ function ydReadWithIdle(reader) {
   return Promise.race([reader.read(), idle]).finally(() => clearTimeout(timer));
 }
 
-// Один заход: скачивание и запись одного файла. Бросает ошибку при любом несовпадении.
+// Один заход: скачивание и запись одного файла. Если часть файла уже на диске, докачивает с этого места.
+// Бросает ошибку при любом несовпадении. Частично скачанный файл не удаляется: следующий заход продолжит его.
 async function ydWriteAttempt(rootDir, entry, options) {
   const parts = ydTargetParts(entry);
   const fileName = parts.pop();
@@ -181,6 +182,10 @@ async function ydWriteAttempt(rootDir, entry, options) {
   for (const part of parts) {
     dir = await dir.getDirectoryHandle(part, { create: true });
   }
+
+  // Сколько уже есть на диске. Полный, но не совпавший файл докачивать нельзя: начинаем с нуля.
+  const partial = await ydExistingFile(dir, fileName);
+  let offset = partial && entry.size && partial.size < entry.size ? partial.size : 0;
 
   const { href } = await ydApiGet('/download', { public_key: entry.publicKey, path: entry.path });
 
@@ -196,7 +201,7 @@ async function ydWriteAttempt(rootDir, entry, options) {
   options.signal?.addEventListener('abort', onUserAbort);
   let response;
   try {
-    response = await fetch(href, { signal: controller.signal });
+    response = await fetch(href, { signal: controller.signal, headers: offset ? { Range: `bytes=${offset}-` } : {} });
   } catch (error) {
     options.signal?.removeEventListener('abort', onUserAbort);
     if (headersTimedOut) throw new Error('сервер не ответил вовремя');
@@ -204,20 +209,30 @@ async function ydWriteAttempt(rootDir, entry, options) {
   } finally {
     clearTimeout(headersTimer);
   }
+  // Сервер ответил 200 на запрос докачки: отдал файл целиком, пишем заново.
+  if (offset && response.status === 200) offset = 0;
+  // 416: докачивать нечего, частичный файл не подходит. Удаляем его, следующий заход начнёт с нуля.
+  if (response.status === 416) {
+    options.signal?.removeEventListener('abort', onUserAbort);
+    await response.body?.cancel().catch(() => {});
+    await dir.removeEntry(fileName).catch(() => {});
+    throw new Error('частичный файл не подошёл, начинаем заново');
+  }
   if (!response.ok || !response.body) {
     options.signal?.removeEventListener('abort', onUserAbort);
     throw new Error(`сервер загрузок не отдал файл (ошибка ${response.status})`);
   }
   const declared = Number(response.headers.get('content-length'));
-  if (entry.size && declared && declared !== entry.size) {
+  const expectedBody = entry.size ? entry.size - offset : 0;
+  if (expectedBody && declared && declared !== expectedBody) {
     options.signal?.removeEventListener('abort', onUserAbort);
     throw new Error('размер файла на сервере не совпадает с Яндекс.Диском');
   }
 
   const handle = await dir.getFileHandle(fileName, { create: true });
-  const writable = await handle.createWritable();
-  const keepChunks = Boolean(entry.sha256) && (entry.size ?? 0) <= YD_HASH_MAX_BYTES;
-  const chunks = [];
+  // При докачке старые байты сохраняем и пишем с позиции обрыва.
+  const writable = await handle.createWritable({ keepExistingData: offset > 0 });
+  if (offset > 0) await writable.seek(offset);
   let written = 0;
   const reader = response.body.getReader();
   try {
@@ -226,29 +241,32 @@ async function ydWriteAttempt(rootDir, entry, options) {
       const { done, value } = await ydReadWithIdle(reader);
       if (done) break;
       await writable.write(value);
-      if (keepChunks) chunks.push(value);
       written += value.byteLength;
-      if (options.onProgress) options.onProgress(written);
+      if (options.onProgress) options.onProgress(offset + written);
     }
     await writable.close();
   } catch (error) {
     reader.cancel().catch(() => {});
-    await writable.abort().catch(() => {});
+    // Записанную часть сохраняем, чтобы следующий заход докачал остальное.
+    await writable.close().catch(() => {});
     throw error;
   } finally {
     options.signal?.removeEventListener('abort', onUserAbort);
   }
 
-  if (entry.size && written !== entry.size) {
+  const total = offset + written;
+  if (entry.size && total !== entry.size) {
     throw new Error('файл скачался не весь');
   }
-  if (entry.sha256 && keepChunks) {
-    const hash = await ydSha256Hex(await new Blob(chunks).arrayBuffer());
-    if (hash !== entry.sha256) {
+  // Проверяем весь файл с диска: так работает и для докачанного, и для целого.
+  if (entry.sha256 && (entry.size ?? 0) <= YD_HASH_MAX_BYTES) {
+    const saved = await (await handle.getFile()).arrayBuffer();
+    if ((await ydSha256Hex(saved)) !== entry.sha256) {
+      await dir.removeEntry(fileName).catch(() => {});
       throw new Error('содержимое файла не совпало с Яндекс.Диском');
     }
   }
-  return written;
+  return total;
 }
 
 // Пишет один файл в выбранную папку. Если такой файл уже есть и совпадает, пропускает его.

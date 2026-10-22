@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Яндекс.Диск: скачивание по ссылке",
+  "version": "2.0.0",
+  "description": "Скачивает файлы и папки с публичной ссылки Яндекс.Диска в выбранную папку, с сохранением структуры.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": ["contextMenus"],
+  "host_permissions": [
+    "https://cloud-api.yandex.net/*",
+    "https://downloader.disk.yandex.ru/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://disk.yandex.ru/d/*", "https://yadi.sk/d/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Яндекс.Диск: скачивание по ссылке",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+    }
+  }
+}

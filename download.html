@@ -7,61 +7,61 @@
     :root {
       color-scheme: dark;
       --bg: #111214;
-      --card: rgba(255, 255, 255, .05);
-      --card-strong: rgba(255, 255, 255, .09);
-      --border: rgba(255, 255, 255, .10);
+      --surface: #17181b;
+      --line: rgba(255, 255, 255, .08);
+      --stroke: rgba(255, 255, 255, .24);
       --text: #f4f4f5;
-      --muted: #9a9ca6;
+      --muted: #8b8d96;
+      --faint: #55575f;
       --accent: #f4a08a;
-      --accent-text: #1a120f;
       --ok: #9be0b0;
       --err: #ff8a8a;
-      --track: rgba(255, 255, 255, .10);
     }
-    body { font: 14px/1.45 system-ui, sans-serif; max-width: 760px; margin: 0 auto; padding: 28px 18px 32px; box-sizing: border-box; min-height: 100vh; background: var(--bg); color: var(--text); }
-    h1 { font-size: 18px; font-weight: 600; margin: 0 0 16px; letter-spacing: -.01em; }
+    body { font: 14px/1.5 system-ui, sans-serif; max-width: 720px; margin: 0 auto; padding: 24px 20px 32px; box-sizing: border-box; min-height: 100vh; background: var(--bg); color: var(--text); }
     button, input { font: inherit; }
-    button { padding: 9px 16px; border: 1px solid var(--border); border-radius: 999px; background: var(--card); color: var(--text); cursor: pointer; transition: background .15s; }
-    button:hover:not(:disabled) { background: var(--card-strong); }
-    button.primary { background: var(--accent); border-color: transparent; color: var(--accent-text); font-weight: 600; }
-    button.primary:hover:not(:disabled) { background: #f7b2a0; }
-    button:disabled { opacity: .45; cursor: default; }
+    button { padding: 9px 18px; border: 0; border-radius: 999px; background: #f4f4f5; color: #111214; font-weight: 600; cursor: pointer; transition: background .15s, transform .15s; }
+    button:hover:not(:disabled) { background: #ffffff; }
+    button.quiet { background: transparent; color: var(--text); box-shadow: inset 0 0 0 1px var(--stroke); font-weight: 500; }
+    button.quiet:hover:not(:disabled) { background: rgba(255, 255, 255, .05); }
+    button:active:not(:disabled) { transform: scale(.97); }
+    button:focus-visible, input:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--accent); }
+    button:disabled { background: transparent; color: var(--faint); box-shadow: inset 0 0 0 1px var(--line); cursor: default; }
     button[hidden] { display: none; }
     #cancel:disabled { display: none; }
-    .link-row { display: flex; gap: 8px; margin-bottom: 14px; }
-    .link-row input { flex: 1; min-width: 0; padding: 10px 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); color: var(--text); outline: none; }
+    .link-row { display: flex; gap: 10px; }
+    .link-row input { flex: 1; min-width: 0; padding: 11px 16px; border: 0; border-radius: 14px; background: var(--surface); color: var(--text); box-shadow: inset 0 0 0 1px var(--line); outline: none; }
     .link-row input::placeholder { color: var(--muted); }
-    .link-row input:focus { border-color: var(--accent); }
-    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 18px 0 8px; }
-    #summary { color: var(--muted); }
-    #selectAll { padding: 6px 12px; font-size: 13px; }
-    #list { max-height: 420px; overflow-y: auto; border: 1px solid var(--border); border-radius: 18px; background: var(--card); padding: 4px 14px; }
-    #list:empty { display: none; }
-    .row { display: flex; gap: 12px; padding: 10px 0; align-items: center; border-bottom: 1px solid var(--border); }
-    .row:last-child { border-bottom: 0; }
-    .row input[type=checkbox] { accent-color: var(--accent); width: 16px; height: 16px; }
-    .row .name { flex: 1; word-break: break-all; }
-    .row .size { color: var(--muted); white-space: nowrap; font-size: 13px; }
-    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
-    #progress { color: var(--muted); font-size: 13px; min-height: 18px; margin-top: 12px; }
-    #status { min-height: 22px; margin-top: 12px; white-space: pre-line; }
-    .err { color: var(--err); }
-    .ok { color: var(--ok); }
-    .hint { color: var(--muted); font-size: 13px; margin: 20px 0 0; }
-    #recent { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 0 14px; }
+    .link-row input:focus { box-shadow: inset 0 0 0 1px var(--accent); }
+    #recent { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0; }
     #recent:empty { display: none; }
-    .chip { padding: 5px 12px; font-size: 13px; }
-    #bar { height: 6px; background: var(--track); border-radius: 3px; overflow: hidden; margin-top: 12px; }
+    .chip { padding: 4px 12px; font-size: 13px; font-weight: 500; }
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 24px 0 10px; }
+    #summary { color: var(--muted); font-size: 13px; }
+    #selectAll { padding: 0; background: none; color: var(--muted); font-size: 13px; font-weight: 500; border-radius: 0; box-shadow: none; }
+    #selectAll:hover:not(:disabled) { background: none; color: var(--text); }
+    #selectAll:disabled { background: none; box-shadow: none; color: var(--faint); }
+    #list { max-height: 420px; overflow-y: auto; border-radius: 14px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); padding: 4px 16px; }
+    #list:empty { display: none; }
+    .row { display: flex; gap: 12px; padding: 11px 0; align-items: center; border-bottom: 1px solid var(--line); }
+    .row:last-child { border-bottom: 0; }
+    .row input[type=checkbox] { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+    .row .name { flex: 1; word-break: break-all; font-size: 14px; }
+    .row .size { color: var(--muted); white-space: nowrap; font-size: 13px; font-variant-numeric: tabular-nums; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    #progress { color: var(--muted); font-size: 13px; min-height: 18px; margin-top: 14px; }
+    #bar { height: 4px; background: rgba(255, 255, 255, .08); border-radius: 2px; overflow: hidden; margin-top: 10px; }
     #bar[hidden] { display: none; }
     #fill { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+    #status { min-height: 22px; margin-top: 14px; white-space: pre-line; font-size: 14px; }
+    .err { color: var(--err); }
+    .ok { color: var(--ok); }
     #openTab[hidden] { display: none; }
   </style>
 </head>
 <body>
-  <h1>Яндекс.Диск: скачивание по ссылке</h1>
   <div class="link-row">
-    <input type="text" id="link" placeholder="Вставьте ссылку, например https://disk.yandex.ru/d/...">
-    <button id="open" class="primary">Показать файлы</button>
+    <input type="text" id="link" placeholder="Вставьте ссылку на Яндекс.Диск" aria-label="Ссылка на Яндекс.Диск">
+    <button id="open">Показать файлы</button>
   </div>
   <div id="recent"></div>
   <div class="toolbar">
@@ -70,15 +70,14 @@
   </div>
   <div id="list"></div>
   <div class="actions">
-    <button id="downloadSelected" class="primary" disabled>Выбрать папку и скачать</button>
-    <button id="useSaved" hidden>Скачать в сохранённую папку</button>
-    <button id="cancel" disabled>Остановить</button>
-    <button id="openTab" hidden>Открыть в новой вкладке</button>
+    <button id="downloadSelected" disabled>Выбрать папку и скачать</button>
+    <button id="useSaved" class="quiet" hidden>Скачать в сохранённую папку</button>
+    <button id="cancel" class="quiet" disabled>Остановить загрузку</button>
+    <button id="openTab" class="quiet" hidden>Открыть в новой вкладке</button>
   </div>
   <div id="progress"></div>
-  <div id="bar" hidden><div id="fill"></div></div>
-  <div id="status"></div>
-  <p class="hint">Внутри выбранной папки появится папка с названием из Яндекс.Диска (например, «Дуся_v2») с той же структурой. Файлы, которые уже есть на компьютере и совпадают с Яндекс.Диском, не скачиваются заново.</p>
+  <div id="bar" hidden role="progressbar" aria-label="Прогресс загрузки" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="fill"></div></div>
+  <div id="status" role="status" aria-live="polite"></div>
   <script src="yandex-api.js"></script>
   <script src="download.js"></script>
 </body>

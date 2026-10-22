@@ -72,7 +72,7 @@ function updateSummary() {
     ? `Выбрано ${chosen.length} из ${entries.length}${chosen.length ? `, около ${formatSize(bytes)}` : ''}`
     : '';
   selectAllButton.textContent = entries.length && chosen.length === entries.length ? 'Снять все' : 'Выбрать все';
-  downloadButton.disabled = !chosen.length || Boolean(controller);
+  downloadButton.disabled = !entries.length || Boolean(controller);
 }
 
 // Сообщаем странице Яндекс.Диска (через фоновый скрипт), как идёт загрузка: процент виден на кнопке даже при закрытом окне.
@@ -203,12 +203,12 @@ async function loadList() {
 
 openButton.addEventListener('click', async () => {
   openButton.disabled = true;
-  setStatus('Смотрю, что лежит по ссылке...');
+  setStatus('Загружаю список файлов...');
   try {
     entries = await loadList();
     renderList();
     saveRecent(ydNormalizeLink(linkInput.value), entries[0]?.rootName || entries[0]?.name || linkInput.value);
-    setStatus(`Найдено файлов: ${entries.length}. Отметьте нужные и нажмите кнопку загрузки внизу.`, 'ok');
+    setStatus(`Нашёл файлов: ${entries.length}. Отметьте нужные и нажмите «Выбрать папку и скачать».`, 'ok');
   } catch (error) {
     entries = [];
     renderList();
@@ -220,6 +220,13 @@ openButton.addEventListener('click', async () => {
 
 linkInput.addEventListener('keydown', (event) => {
   if (event.key === 'Enter') openButton.click();
+});
+
+// Вставили ссылку — список открывается сам, кнопка «Показать файлы» нужна только при ручном вводе.
+linkInput.addEventListener('paste', () => {
+  setTimeout(() => {
+    if (/^https?:\/\/(disk\.yandex\.[a-z.]+|yadi\.sk)\/d\//i.test(linkInput.value.trim())) openButton.click();
+  }, 0);
 });
 
 selectAllButton.addEventListener('click', () => {
@@ -263,6 +270,7 @@ async function downloadEntries(rootDir, chosen) {
     const percent = totalBytes ? Math.min(100, Math.round((total / totalBytes) * 100)) : 0;
     barBox.hidden = false;
     barFill.style.width = `${percent}%`;
+    barBox.setAttribute('aria-valuenow', String(percent));
     notifyParent({ busy: true, percent });
   }, PROGRESS_INTERVAL_MS);
 
@@ -328,7 +336,7 @@ async function startDownload(rootDir) {
     } else if (pending.length || done < chosen.length) {
       const lines = pending.map((entry) => `${entry.rel}: ${errors.get(entry)}`);
       const problem = lines.length ? `Не получилось скачать:\n${lines.join('\n')}` : 'Часть файлов не дошла до записи.';
-      setStatus(`Скачано не всё. Готово: ${stats.written}, уже были: ${stats.skipped}.\n${problem}\nНажмите кнопку загрузки ещё раз, скачаются только недостающие.`, 'err');
+      setStatus(`Скачано не всё. Готово: ${stats.written}, уже были: ${stats.skipped}.\n${problem}\nНажмите «Выбрать папку и скачать» ещё раз: скачаются только недостающие.`, 'err');
     } else {
       ok = true;
       setStatus(`Готово! Скачано файлов: ${stats.written}. Уже были на компьютере: ${stats.skipped}. Все файлы на месте и совпадают с Яндекс.Диском.${reportSaved ? '\nОтчёт сохранён в файл download-report.txt.' : ''}`, 'ok');
@@ -346,7 +354,15 @@ async function startDownload(rootDir) {
 }
 
 // Новая папка: выбираем через окно и сохраняем для следующего раза.
+// Есть ли отмеченные файлы. Проверяем до выбора папки, чтобы не спрашивать папку зря.
+function hasSelection() {
+  if (listBox.querySelector('input[type=checkbox]:checked')) return true;
+  setStatus('Не отмечено ни одного файла. Отметьте галочками, что нужно скачать.', 'err');
+  return false;
+}
+
 downloadButton.addEventListener('click', async () => {
+  if (!hasSelection()) return;
   // showDirectoryPicker нужно вызвать сразу по клику, пока действует нажатие пользователя.
   let rootDir;
   try {
@@ -372,6 +388,7 @@ downloadButton.addEventListener('click', async () => {
 
 // Сохранённая папка: доступ переспрашиваем по клику.
 useSavedButton.addEventListener('click', async () => {
+  if (!hasSelection()) return;
   const handle = await loadDirHandle();
   if (!handle) {
     await refreshSavedButton();

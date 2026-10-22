@@ -10,8 +10,10 @@
     input[type=text] { width: 100%; box-sizing: border-box; padding: 10px 14px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); color: var(--text); outline: none; }
     input[type=text]::placeholder { color: var(--muted); }
     input[type=text]:focus { border-color: var(--accent); }
-    button { padding: 9px 16px; border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-text); font: inherit; font-weight: 600; cursor: pointer; }
-    button:hover { background: #f7b2a0; }
+    button { padding: 9px 16px; border: 0; border-radius: 999px; background: #f4f4f5; color: #111214; font: inherit; font-weight: 600; cursor: pointer; }
+    button:hover { background: #ffffff; }
+    button:active { transform: scale(.97); }
+    button:focus-visible, input:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--accent); }
     .err { color: var(--err); }
     .ok { color: var(--ok); }
     #status { min-height: 18px; margin-top: 10px; }
@@ -19,9 +21,9 @@
 </head>
 <body>
   <h1>Яндекс.Диск: скачивание по ссылке</h1>
-  <input type="text" id="link" placeholder="https://disk.yandex.ru/d/...">
+  <input type="text" id="link" placeholder="https://disk.yandex.ru/d/..." aria-label="Ссылка на Яндекс.Диск">
   <button id="open">Показать файлы</button>
-  <div id="status"></div>
+  <div id="status" role="status" aria-live="polite"></div>
   <script src="yandex-api.js"></script>
   <script src="popup.js"></script>
 </body>

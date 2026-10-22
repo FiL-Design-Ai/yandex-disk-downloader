@@ -29,9 +29,9 @@
     root.innerHTML = `
       <style>
         .pill { position: fixed; right: 16px; bottom: 16px; z-index: 2147483000; padding: 11px 20px; border: 0; border-radius: 999px;
-          background: #02e7ff; color: #04191d; font: 600 14px/1 system-ui, sans-serif; box-shadow: 0 8px 24px rgba(0, 0, 0, .35); cursor: pointer; }
-        .pill:hover { background: #5ff0ff; }
-        .pill.busy, .pill.done { background: #ff7d43; color: #1a0d07; }
+          background: #2bebc8; color: #04201a; font: 600 14px/1 system-ui, sans-serif; box-shadow: 0 8px 24px rgba(0, 0, 0, .35); cursor: pointer; }
+        .pill:hover { background: #5cf2d8; }
+        .pill.busy, .pill.done { background: #2bebc8; color: #04201a; }
       </style>
       <button class="pill" type="button">${LABEL}</button>`;
     pill = root.querySelector('.pill');

@@ -6,21 +6,21 @@
   <style>
     :root {
       color-scheme: dark;
-      --bg: #111214;
-      --surface: #17181b;
+      --bg: #0e0f11;
+      --surface: #16181b;
       --line: rgba(255, 255, 255, .08);
-      --stroke: rgba(255, 255, 255, .24);
-      --text: #f4f4f5;
-      --muted: #8b8d96;
-      --faint: #55575f;
-      --accent: #f4a08a;
-      --ok: #9be0b0;
-      --err: #ff8a8a;
+      --stroke: rgba(255, 255, 255, .22);
+      --text: #f4f7f8;
+      --muted: #8a9199;
+      --faint: #50565e;
+      --accent: #02e7ff;
+      --ok: #02e7ff;
+      --err: #ff7d43;
     }
     body { font: 14px/1.5 system-ui, sans-serif; max-width: 720px; margin: 0 auto; padding: 24px 20px 32px; box-sizing: border-box; min-height: 100vh; background: var(--bg); color: var(--text); }
     button, input { font: inherit; }
-    button { padding: 9px 18px; border: 0; border-radius: 999px; background: #f4f4f5; color: #111214; font-weight: 600; cursor: pointer; transition: background .15s, transform .15s; }
-    button:hover:not(:disabled) { background: #ffffff; }
+    button { padding: 9px 18px; border: 0; border-radius: 999px; background: var(--accent); color: #04191d; font-weight: 600; cursor: pointer; transition: background .15s, transform .15s; }
+    button:hover:not(:disabled) { background: #5ff0ff; }
     button.quiet { background: transparent; color: var(--text); box-shadow: inset 0 0 0 1px var(--stroke); font-weight: 500; }
     button.quiet:hover:not(:disabled) { background: rgba(255, 255, 255, .05); }
     button:active:not(:disabled) { transform: scale(.97); }

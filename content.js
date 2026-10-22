@@ -28,10 +28,10 @@
     const root = host.attachShadow({ mode: 'open' });
     root.innerHTML = `
       <style>
-        .pill { position: fixed; right: 16px; bottom: 16px; z-index: 2147483000; padding: 10px 18px; border: 0; border-radius: 999px;
-          background: #0b5ed7; color: #fff; font: 600 14px/1 system-ui, sans-serif; box-shadow: 0 4px 14px rgba(0, 0, 0, .25); cursor: pointer; }
-        .pill:hover { background: #0a53be; }
-        .pill.busy, .pill.done { background: #1b7f3b; }
+        .pill { position: fixed; right: 16px; bottom: 16px; z-index: 2147483000; padding: 11px 20px; border: 1px solid rgba(255, 255, 255, .12); border-radius: 999px;
+          background: rgba(20, 21, 24, .88); color: #f4f4f5; font: 600 14px/1 system-ui, sans-serif; box-shadow: 0 8px 24px rgba(0, 0, 0, .35); cursor: pointer; backdrop-filter: blur(10px); }
+        .pill:hover { background: rgba(38, 40, 45, .95); }
+        .pill.busy, .pill.done { background: #f4a08a; color: #1a120f; border-color: transparent; }
       </style>
       <button class="pill" type="button">${LABEL}</button>`;
     pill = root.querySelector('.pill');
